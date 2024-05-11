@@ -42,7 +42,6 @@ export const CreateSchedule = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4">Create Schedule</h2>
       {error && <div className="text-red-500 mb-4">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">

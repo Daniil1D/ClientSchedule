@@ -1,11 +1,11 @@
-import { User } from "../types"
-import { api } from "./api"
+import { Role, User } from "../types";
+import { api } from "./api";
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const userApi = api.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation<
-      { token: string },
+      { token: string; role: Role }, // Обновленный тип данных для включения роли
       { email: string; password: string }
     >({
       query: (userData) => ({
@@ -15,15 +15,15 @@ export const userApi = api.injectEndpoints({
       }),
     }),
     register: builder.mutation<
-    { email: string; password: string; name: string; roleName: string; class?: string }, // Добавляем class как опциональное поле
-    { email: string; password: string; name: string } // Удаляем лишние поля
->({
-    query: (userData) => ({
+      { email: string; password: string; name: string; roleName: string; class?: string },
+      { email: string; password: string; name: string; roleName: string; class?: string }
+    >({
+      query: (userData) => ({
         url: "/register",
         method: "POST",
         body: userData,
+      }),
     }),
-}),
     current: builder.query<User, void>({
       query: () => ({
         url: "/current",
@@ -44,7 +44,7 @@ export const userApi = api.injectEndpoints({
       }),
     }),
   }),
-})
+});
 
 export const {
   useRegisterMutation,
@@ -54,8 +54,8 @@ export const {
   useGetUserByIdQuery,
   useLazyGetUserByIdQuery,
   useUpdateUserMutation,
-} = userApi
+} = userApi;
 
 export const {
   endpoints: { login, register, current, getUserById, updateUser },
-} = userApi
+} = userApi;

@@ -28,9 +28,7 @@ export const Header = () => {
 
   return (
     <Navbar>
-      <NavbarBrand>
-        <p className="font-bold text-inherit">Network Social</p>
-      </NavbarBrand>
+
 
       <NavbarContent justify="end">
         <NavbarItem

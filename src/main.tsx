@@ -13,7 +13,9 @@ import { Layout } from "./components/layout"
 import { CurrentPost } from "./pages/current-post"
 import { UserProfile } from "./pages/user-profile"
 import { AllSchedules } from "./pages/schedule"
+import { CreateSchedulePage } from "./pages/create-schedule"
 import { AuthGuard } from "./features/user/authGuard"
+import { EditSchedule } from "./pages/editSchedule"
 
 
 const container = document.getElementById("root")
@@ -27,12 +29,12 @@ const router = createBrowserRouter([
     element: <Layout/>,
     children: [
       {
-        path: "",
-        element: <Posts />,
+          // path: "",
+          // element: <Posts />,
       },
       {
-        path: "posts/:id",
-        element: <CurrentPost />,
+          // path: "posts/:id",
+          // element: <CurrentPost />,
       },
       {
         path: "users/:id",
@@ -40,8 +42,17 @@ const router = createBrowserRouter([
       },
       {
         path: "schedule",
-        element: <AllSchedules userRole="Заместитель Директора" />,
+        element: <AllSchedules/>, 
       },
+      {
+        path: "CreateSchedule",
+        element: <CreateSchedulePage/>,
+      },
+      {
+        path: "editSchedule/:id",
+        element: <EditSchedule/>
+      },
+
     ],
   }
 ])

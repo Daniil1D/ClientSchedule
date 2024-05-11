@@ -39,7 +39,7 @@ export const Login = ({ setSelected }: Props) => {
     try {
       await login(data).unwrap()
       await triggerCurrentQuery().unwrap();
-      navigate("/")
+      navigate("/schedule")
     } catch (err) {
       if (hasErrorField(err)) {
         setError(err.data.error)

@@ -1,17 +1,18 @@
 export interface User {
   id: string;
-  email: string; // Добавьте поле email
+  email: string;
   password: string;
   name?: string;
   avatarUrl?: string;
-  role: Role;
+  role: Role ;
+  roleId: number;
   class?: string;
   dateOfBirth?: Date;
   createdAt: Date;
   updatedAt: Date;
   bio?: string;
   location?: string;
-  posts: Post[];
+  posts: Post[]; 
   comments: Comment[];
   createdSchedules: Schedule[];
   schedules: Schedule[]; 
@@ -81,7 +82,7 @@ export interface Schedule {
   teacherId: number;
   teacher: Teacher;
   lessonTimeId: number;
-  lessonTime: LessonTime; // Подставьте интерфейс LessonTime
+  lessonTime: LessonTime;
   subjectId: number;
   subject: Subject;
   createdBy: User;

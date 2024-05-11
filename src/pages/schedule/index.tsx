@@ -1,26 +1,92 @@
 import React, { useState } from 'react';
-import { useGetScheduleByClassIdQuery } from '../../app/services/scheduleApi';
+import { FaEdit, FaTrash } from 'react-icons/fa';
+import { useGetScheduleByClassIdQuery, useDeleteScheduleMutation } from '../../app/services/scheduleApi';
 import { Schedule } from '../../app/types';
-import { CreateSchedule } from "../../components/create-schedule";
+import { Button } from "../../components/button"
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from "react-redux";
+import { selectUserRole } from "../../features/user/userSlice";
 
-export const AllSchedules = ({ userRole }: { userRole: string }) => {
-  const [selectedClass, setSelectedClass] = useState<string>('1'); // Default class selected
-  const { data: schedules, isLoading, isError } = useGetScheduleByClassIdQuery(selectedClass);
+export const AllSchedules = () => {
+  const [selectedClass, setSelectedClass] = useState<string>('1а');
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
+  const { data: schedules, isLoading, isError, refetch } = useGetScheduleByClassIdQuery(selectedClass);
 
+  const navigate = useNavigate();
+  const currentUserRole = useSelector(selectUserRole);
+  const [deleteScheduleMutation] = useDeleteScheduleMutation();
+
+  
   const handleClassChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedClass(event.target.value);
+  };
+
+  const handleEditSchedule = (schedule: Schedule) => {
+    navigate(`/editSchedule/${schedule.id}`);
+  };
+
+  const handleDeleteSchedule = async (scheduleId: string) => {
+    try {
+      await deleteScheduleMutation(scheduleId);
+     // После успешного удаления перезагрузим данные расписания
+     refetch();
+    } catch (error) {
+      console.error('Error deleting schedule:', error);
+    }
   };
 
   if (isLoading) return <div>Loading...</div>;
 
   if (isError) return <div>Error fetching schedules</div>;
 
+  // Function to group schedules by date
+  const groupSchedulesByDate = () => {
+    const groupedSchedules: { [date: string]: Schedule[] } = {};
+    schedules.forEach((schedule: Schedule) => {
+      const date = new Date(schedule.date).toLocaleDateString('ru-RU', { weekday: 'short', month: 'short', day: '2-digit' });
+      if (!groupedSchedules[date]) {
+        groupedSchedules[date] = [];
+      }
+      groupedSchedules[date].push(schedule);
+    });
+    return groupedSchedules;
+  };
+
+  // Render schedules grouped by date
+  const renderSchedulesByDate = () => {
+    const groupedSchedules = groupSchedulesByDate();
+    return Object.entries(groupedSchedules).map(([date, schedules]) => (
+      <div key={date}>
+        <h3>{date}</h3>
+        <table className="w-full border-collapse border border-black">                      
+          <tbody>
+            {schedules && schedules.map((schedule: Schedule, index: number) => (
+              <tr key={schedule.id} className={(index + 1) % 2 === 0 ? 'border-black' : ''}>
+                <td className="p-4">{index + 1}</td>
+                <td className="p-4 w-2/5">{schedule.date}</td>
+                <td className="p-4 w-2/5">{schedule.subject.name}</td>
+                <td className="p-4 w-2/5">{`${schedule.lessonTime.startTime}-${schedule.lessonTime.endTime}`}</td>
+                <td className="p-4 w-2/5">{schedule.teacher.fullName}</td>
+                {currentUserRole === 'Заместитель Директора' && (
+                <td className="p-4 w-2/5">
+                  <button onClick={() => handleEditSchedule(schedule)}><FaEdit/></button>
+                  <button onClick={() => handleDeleteSchedule(schedule.id)}><FaTrash/></button>
+                </td>
+              )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ));
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4">All Schedules</h2>
+      <h2 className="text-2xl font-bold mb-4">Все расписания</h2>
       <div className="mb-4">
         <label htmlFor="classSelect" className="block text-sm font-medium text-gray-700">
-          Select Class:
+          Выберите класс:
         </label>
         <select
           id="classSelect"
@@ -64,33 +130,10 @@ export const AllSchedules = ({ userRole }: { userRole: string }) => {
           <option value="33">11в</option>
         </select>
       </div>
-      {userRole === 'Заместитель Директора' && ( 
-        <div className="mb-10 w-full flex">
-          <CreateSchedule />
-        </div>
-      )}
-      <table className="w-full border-collapse border border-black">
-        <thead>
-          <tr className="bg-black text-white">
-            <th className="p-4 text-left">#</th>
-            <th className="p-4 text-left">Date</th>
-            <th className="p-4 text-left">Subject</th>
-            <th className="p-4 text-left">Time</th>
-            <th className="p-4 text-left">Teacher</th>
-          </tr>
-        </thead>
-        <tbody>
-          {schedules && schedules.map((schedule: Schedule, index: number) => (
-            <tr key={schedule.id} className={(index + 1) % 2 === 0 ? 'border-black' : ''}>
-              <td className="p-4">{index + 1}</td>
-              <td className="p-4">{schedule.date}</td>
-              <td className="p-4">{schedule.subject.name}</td>
-              <td className="p-4">{`${schedule.lessonTime.startTime}-${schedule.lessonTime.endTime}`}</td>
-              <td className="p-4">{schedule.teacher.fullName}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      
+      
+      {/* Отображение расписания */}
+      {renderSchedulesByDate()}
     </div>
   );
 };
