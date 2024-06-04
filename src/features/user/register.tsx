@@ -23,6 +23,7 @@ type Props = {
 export const Register = ({ setSelected }: Props) => {
     const [selectedRole, setSelectedRole] = useState("");
     const [selectedClass, setSelectedClass] = useState("");
+    const [isRegistered, setIsRegistered] = useState(false); // Добавлено новое состояние
     const { handleSubmit, control, formState: { errors } } = useForm<Register>({
         mode: "onChange",
         reValidateMode: "onBlur",
@@ -42,6 +43,7 @@ export const Register = ({ setSelected }: Props) => {
         try {
             await register(data).unwrap();
             setSelected("login");
+            setIsRegistered(true); // Установить статус регистрации в true при успехе
         } catch (err) {
             if (hasErrorField(err)) {
                 setError(err.data.error);
@@ -89,21 +91,16 @@ export const Register = ({ setSelected }: Props) => {
                     required="Обязательное поле"
                 />
             )}
+            
             <ErrorMessage error={error} />
-
-            <p className="text-center text-small">
-                Уже есть аккаунт?{" "}
-                <Link
-                    size="sm"
-                    className="cursor-pointer"
-                    onPress={() => setSelected("login")}
-                >
-                    Войдите
-                </Link>
-            </p>
+            {isRegistered && (
+                <div className="text-center mt-4">
+                    <p>Вы успешно зарегистрированы!</p>
+                </div>
+            )}
             <div className="flex gap-2 justify-end">
                 <Button fullWidth color="primary" type="submit">
-                    Зарегистрироваться
+                    Зарегистрировать
                 </Button>
             </div>
         </form>

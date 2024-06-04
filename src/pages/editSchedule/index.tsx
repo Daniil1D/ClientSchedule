@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useEditScheduleMutation, useGetScheduleByIdQuery } from '../../app/services/scheduleApi';
 import { Schedule, Subject, Class, LessonTime } from '../../app/types';
 import { GoBack } from "../../components/go-back";
@@ -8,6 +8,7 @@ import { useGetAllClassesQuery } from '../../app/services/classesApi'; // Имп
 import { useGetAllLessonTimesQuery } from '../../app/services/lessonTimeApi'; // Импорт хука для получения списка времен уроков
 
 export const EditSchedule = () => {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [updatedData, setUpdatedData] = useState<Schedule | null>(null);
   const [editSchedule, { isLoading, isError }] = useEditScheduleMutation();
@@ -15,7 +16,7 @@ export const EditSchedule = () => {
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const { data: subjectsData } = useGetAllSubjectsQuery();
-
+ 
   const [classes, setClasses] = useState<Class[]>([]);
   const { data: classesData } = useGetAllClassesQuery();
 
@@ -74,6 +75,7 @@ export const EditSchedule = () => {
 
     try {
       await editSchedule({ scheduleId: id!, updatedData }).unwrap();
+      navigate('/schedule');
     } catch (error) {
       console.error('Error editing schedule:', error);
     }
@@ -104,7 +106,7 @@ export const EditSchedule = () => {
             <label htmlFor="teacherId" className="block text-sm font-semibold">Teacher ID:</label>
             <input type="text" id="teacherId" name="teacherId" value={updatedData?.teacherId} onChange={handleChange} className="border border-gray-300 rounded-md p-2 w-full" />
           </div>
-          <div className="mb-4">
+          <div className="mb-4"> 
             <label htmlFor="lessonTimeId" className="block text-sm font-semibold">Lesson Time:</label>
             <select id="lessonTimeId" name="lessonTimeId" value={updatedData?.lessonTimeId} onChange={handleSelectChange} className="border border-gray-300 rounded-md p-2 w-full">
               {lessonTimes.map(time => (

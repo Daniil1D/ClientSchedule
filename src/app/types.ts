@@ -98,5 +98,5 @@ export interface LessonTime {
   lessonNumber: number;
   startTime: string;
   endTime: string;
-  schedules: Schedule[]; // Добавлено поле schedules типа Schedule[]
+  schedules: Schedule[];
 }

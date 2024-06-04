@@ -1,24 +1,28 @@
-import React from "react"
-import { createRoot } from "react-dom/client"
-import { Provider } from "react-redux"
-import App from "./App"
-import { store } from "./app/store"
-import "./index.css"
-import {NextUIProvider} from "@nextui-org/react";
-import { RouterProvider, createBrowserRouter } from "react-router-dom"
-import { ThemeProvider } from "./components/theme-provider"
-import { Auth } from "./pages/auth"
-import { Posts } from "./pages/posts"
-import { Layout } from "./components/layout"
-import { CurrentPost } from "./pages/current-post"
-import { UserProfile } from "./pages/user-profile"
-import { AllSchedules } from "./pages/schedule"
-import { CreateSchedulePage } from "./pages/create-schedule"
-import { AuthGuard } from "./features/user/authGuard"
-import { EditSchedule } from "./pages/editSchedule"
+import React from "react";
+import { useState } from "react"
+import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
+import App from "./App";
+import { store } from "./app/store";
+import "./index.css";
+import { NextUIProvider } from "@nextui-org/react";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { ThemeProvider } from "./components/theme-provider";
+import { Auth } from "./pages/auth";
+import { Posts } from "./pages/posts";
+import { Layout } from "./components/layout";
+import { CurrentPost } from "./pages/current-post";
+import { UserProfile } from "./pages/user-profile";
+import { AllSchedules } from "./pages/schedule";
+import { CreateSchedulePage } from "./pages/create-schedule";
+import { AllUser } from "./pages/AllUsers";
+import { AuthGuard } from "./features/user/authGuard";
+import { EditSchedule } from "./pages/editSchedule";
+import { EditUser } from "./pages/editUsers";
+import { Auth2 } from "./pages/auth2";
 
-
-const container = document.getElementById("root")
+//const [selected, setSelected] = useState("login")
+const container = document.getElementById("root");
 const router = createBrowserRouter([
   {
     path: '/auth',
@@ -29,12 +33,12 @@ const router = createBrowserRouter([
     element: <Layout/>,
     children: [
       {
-          // path: "",
-          // element: <Posts />,
+        // path: "",
+        // element: <Posts />,
       },
       {
-          // path: "posts/:id",
-          // element: <CurrentPost />,
+        // path: "posts/:id",
+        // element: <CurrentPost />,
       },
       {
         path: "users/:id",
@@ -52,13 +56,24 @@ const router = createBrowserRouter([
         path: "editSchedule/:id",
         element: <EditSchedule/>
       },
-
+      {
+        path: "AllUsers",
+        element: <AllUser/>,
+      },
+      {
+        path: "editUsers/:id",
+        element: <EditUser/>,
+      },
+      {
+        path: "auth2",
+        element: <Auth2 />,
+      },
     ],
   }
-])
+]);
 
 if (container) {
-  const root = createRoot(container)
+  const root = createRoot(container);
 
   root.render(
     <React.StrictMode>
@@ -69,14 +84,12 @@ if (container) {
               <RouterProvider router={router} />
             </AuthGuard>
           </ThemeProvider>
-         
         </NextUIProvider>
-        
       </Provider>
     </React.StrictMode>,
-  )
+  );
 } else {
   throw new Error(
     "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file.",
-  )
+  );
 }

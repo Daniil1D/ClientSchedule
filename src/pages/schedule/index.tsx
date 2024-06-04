@@ -30,7 +30,7 @@ export const AllSchedules = () => {
       await deleteScheduleMutation(scheduleId);
      // После успешного удаления перезагрузим данные расписания
      refetch();
-    } catch (error) {
+    } catch (error) { 
       console.error('Error deleting schedule:', error);
     }
   };
@@ -39,22 +39,39 @@ export const AllSchedules = () => {
 
   if (isError) return <div>Error fetching schedules</div>;
 
-  // Function to group schedules by date
-  const groupSchedulesByDate = () => {
-    const groupedSchedules: { [date: string]: Schedule[] } = {};
-    schedules.forEach((schedule: Schedule) => {
+// Функция для группировки расписаний по дате, с учетом сортировки
+const groupSchedulesByDayOfWeek = () => {
+  // Получаем текущую дату
+  const today = new Date();
+  const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(endOfWeek.getDate() + 6); // Устанавливаем конец недели на следующий понедельник
+
+  // Создаем объект для хранения расписаний, которые будут отображаться
+  const visibleSchedules: { [date: string]: Schedule[] } = {};
+
+  // Проходимся по всем расписаниям
+  schedules.forEach((schedule: Schedule) => {
+    // Преобразуем дату расписания к формату ISOString и извлекаем дату
+    const scheduleDate = new Date(schedule.date).toISOString().split('T')[0];
+
+    // Проверяем, попадает ли расписание в текущую неделю
+    if (new Date(scheduleDate) >= startOfWeek && new Date(scheduleDate) <= endOfWeek) {
+      // Используем локальное форматирование даты для получения короткого названия дня недели
       const date = new Date(schedule.date).toLocaleDateString('ru-RU', { weekday: 'short', month: 'short', day: '2-digit' });
-      if (!groupedSchedules[date]) {
-        groupedSchedules[date] = [];
+      if (!visibleSchedules[date]) {
+        visibleSchedules[date] = [];
       }
-      groupedSchedules[date].push(schedule);
-    });
-    return groupedSchedules;
-  };
+      visibleSchedules[date].push(schedule);
+    }
+  });
+
+  return visibleSchedules;
+};
 
   // Render schedules grouped by date
   const renderSchedulesByDate = () => {
-    const groupedSchedules = groupSchedulesByDate();
+    const groupedSchedules = groupSchedulesByDayOfWeek();
     return Object.entries(groupedSchedules).map(([date, schedules]) => (
       <div key={date}>
         <h3>{date}</h3>

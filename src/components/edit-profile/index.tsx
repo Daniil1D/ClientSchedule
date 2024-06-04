@@ -97,44 +97,7 @@ import {
                   className="flex flex-col gap-4"
                   onSubmit={handleSubmit(onSubmit)}
                 >
-                  <Input
-                    control={control}
-                    name="email"
-                    label="Email"
-                    type="email"
-                    endContent={<MdOutlineEmail />}
-                  />
                   <Input control={control} name="name" label="Имя" type="text" />
-                  <input
-                    name="avatarUrl"
-                    placeholder="Выберете файл"
-                    type="file"
-                    onChange={handleFileChange}
-                  />
-                  <Input
-                    control={control}
-                    name="dateOfBirth"
-                    label="Дата Рождения"
-                    type="date"
-                    placeholder="Мой"
-                  />
-                  <Controller
-                    name="bio"
-                    control={control}
-                    render={({ field }) => (
-                      <Textarea
-                        {...field}
-                        rows={4}
-                        placeholder="Ваша биография"
-                      />
-                    )}
-                  />
-                  <Input
-                    control={control}
-                    name="location"
-                    label="Местоположение"
-                    type="text"
-                  />
                   <ErrorMessage error={error} />
                   <div className="flex gap-2 justify-end">
                     <Button

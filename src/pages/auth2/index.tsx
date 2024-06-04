@@ -4,7 +4,7 @@ import { Login } from "../../features/user/login"
 import { Register } from "../../features/user/register"
 
 
-export const Auth = () => {
+export const Auth2 = () => {
   const [selected, setSelected] = useState("login")
 
 
@@ -19,12 +19,10 @@ export const Auth = () => {
               selectedKey={selected}
               onSelectionChange={(key) => setSelected(key as string)}
             >
-              <Tab key="login" title="Вход">
-                <Login setSelected={setSelected} />
-              </Tab>
-              {/* <Tab key="sign-up" title="Регистрация">
+
+              <Tab key="sign-up" title="Регистрация">
                 <Register setSelected={setSelected} />
-              </Tab>  */}
+              </Tab> 
             </Tabs>
           </CardBody>
         </Card>

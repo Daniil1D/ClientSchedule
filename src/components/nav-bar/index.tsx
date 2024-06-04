@@ -1,4 +1,3 @@
-// NavBar.tsx
 import React from "react";
 import { BsPostcard } from "react-icons/bs";
 import { FiUsers } from "react-icons/fi";
@@ -23,11 +22,23 @@ export const NavBar: React.FC = () => {
           </NavButton>
         </li>
         {currentUserRole === 'Заместитель Директора' && (
-          <li>
-            <NavButton href="/CreateSchedule" icon={<FiUsers />}>
-              Добавить расписание
-            </NavButton>
-          </li>
+          <>
+            <li>
+              <NavButton href="/CreateSchedule" icon={<FiUsers />}>
+                Добавить расписание
+              </NavButton>
+            </li>
+            <li>
+              <NavButton href="/AllUsers" icon={<FiUsers />}>
+                Список пользователей
+              </NavButton>
+            </li>
+            <li>
+              <NavButton href="/auth2" icon={<FiUsers />}>
+                Зарегистрировать пользователя
+              </NavButton>
+            </li>
+          </>
         )}
       </ul>
     </nav>

@@ -43,6 +43,18 @@ export const userApi = api.injectEndpoints({
         body: userData,
       }),
     }),
+    deleteUser: builder.mutation<void, string>({
+      query: (userId) => ({
+        url: `/users/${userId}`,
+        method: "DELETE",
+      }),
+    }),
+    getAllUsers: builder.query<User[], void>({
+      query: () => ({
+        url: `/users`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -54,8 +66,10 @@ export const {
   useGetUserByIdQuery,
   useLazyGetUserByIdQuery,
   useUpdateUserMutation,
+  useDeleteUserMutation, // Добавлено для удаления пользователя
+  useGetAllUsersQuery,
 } = userApi;
 
 export const {
-  endpoints: { login, register, current, getUserById, updateUser },
+  endpoints: { login, register, current, getUserById, updateUser, deleteUser, getAllUsers },
 } = userApi;
