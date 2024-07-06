@@ -27,12 +27,16 @@ export const AllUser = () => {
   };
 
   // Применение фильтрации по имени, email, роли и классу
-  const filteredUsers = sortedUsers.filter(user =>
-    (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (user.role && user.role.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (user.class && user.class.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredUsers = sortedUsers.filter(user => {
+    if (!user) return false; // Handle cases where user might be null or undefined
+  
+    const nameMatch = user.name && typeof user.name === 'string' && user.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const emailMatch = user.email && typeof user.email === 'string' && user.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const classMatch = user.class && typeof user.class === 'string' && user.class.toLowerCase().includes(searchTerm.toLowerCase());
+  
+    return nameMatch || emailMatch || classMatch;
+  });
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error fetching users:</div>;
@@ -66,11 +70,9 @@ export const AllUser = () => {
               <td className="border px-4 py-2 dark:border-gray-600 dark:text-white">{user.class}</td>
               <td className="border px-4 py-2 dark:border-gray-600 dark:text-white">{user.name || 'N/A'}</td>
               <td className="border px-4 py-2 dark:border-gray-600 dark:text-white">{user.email || 'N/A'}</td>
-              <td className="border px-4 py-2 dark:border-gray-600 dark:text-white">{user.role.name}</td>
+              <td className="border px-4 py-2 dark:border-gray-600 dark:text-white">{user.roleId}</td>
               <td className="border px-4 py-2 dark:border-gray-600 dark:text-white">
-                {/* Кнопки действий */}
-                <button onClick={() => handleEditUser(user.id)}><FaEdit/></button>
-                <button onClick={() => handleDeleteUser(user.id)}><FaTrash/></button>
+              
               </td>
             </tr>
           ))}

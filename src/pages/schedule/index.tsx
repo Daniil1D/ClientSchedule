@@ -1,22 +1,39 @@
-import React, { useState } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import { useGetScheduleByClassIdQuery, useDeleteScheduleMutation } from '../../app/services/scheduleApi';
-import { Schedule } from '../../app/types';
-import { Button } from "../../components/button"
+import React, { useState, useEffect } from 'react';
+import { FaEdit } from 'react-icons/fa';
+import {
+  useGetScheduleByClassIdQuery,
+  useDeleteScheduleMutation,
+} from '../../app/services/scheduleApi';
+import { useGetAllTeachersQuery } from '../../app/services/teacherApi';
+import { useGetAllSubjectsQuery } from '../../app/services/subjectsApi';
+import { useGetAllClassesQuery } from '../../app/services/classesApi';
+import { useGetAllLessonTimesQuery } from '../../app/services/lessonTimeApi'; // Добавлено
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from "react-redux";
-import { selectUserRole } from "../../features/user/userSlice";
+import { useSelector } from 'react-redux';
+import { selectUserRole } from '../../features/user/userSlice';
+import { Schedule, Subject, Teacher, Class, LessonTime } from '../../app/types'; // Обновлено
 
 export const AllSchedules = () => {
   const [selectedClass, setSelectedClass] = useState<string>('1а');
-  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
-  const { data: schedules, isLoading, isError, refetch } = useGetScheduleByClassIdQuery(selectedClass);
+  const {
+    data: schedules,
+    isLoading: isLoadingSchedules,
+    isError: isErrorSchedules,
+    refetch,
+  } = useGetScheduleByClassIdQuery(selectedClass);
+  const { data: teachersData, isLoading: isLoadingTeachers, isError: isErrorTeachers } =
+    useGetAllTeachersQuery();
+  const { data: subjectsData, isLoading: isLoadingSubjects, isError: isErrorSubjects } =
+    useGetAllSubjectsQuery();
+  const { data: classesData, isLoading: isLoadingClasses, isError: isErrorClasses } =
+    useGetAllClassesQuery();
+  const { data: lessonTimesData, isLoading: isLoadingLessonTimes, isError: isErrorLessonTimes } =
+    useGetAllLessonTimesQuery(); // Добавлено
 
   const navigate = useNavigate();
   const currentUserRole = useSelector(selectUserRole);
   const [deleteScheduleMutation] = useDeleteScheduleMutation();
 
-  
   const handleClassChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedClass(event.target.value);
   };
@@ -25,71 +42,102 @@ export const AllSchedules = () => {
     navigate(`/editSchedule/${schedule.id}`);
   };
 
+  const groupSchedulesByDayOfWeek = (schedules: Schedule[] | undefined) => {
+    if (!schedules) return {};
+
+    const groupedSchedules: { [date: string]: Schedule[] } = {};
+    schedules.forEach((schedule) => {
+      const scheduleDate = new Date(schedule.date);
+      const key = scheduleDate.toISOString().split('T')[0];
+      if (!groupedSchedules[key]) {
+        groupedSchedules[key] = [];
+      }
+      groupedSchedules[key].push(schedule);
+    });
+    return groupedSchedules;
+  };
+
   const handleDeleteSchedule = async (scheduleId: string) => {
     try {
       await deleteScheduleMutation(scheduleId);
-     // После успешного удаления перезагрузим данные расписания
-     refetch();
-    } catch (error) { 
+      refetch();
+    } catch (error) {
       console.error('Error deleting schedule:', error);
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  useEffect(() => {
+    refetch();
+  }, [selectedClass, refetch]);
 
-  if (isError) return <div>Error fetching schedules</div>;
+  if (
+    isLoadingSchedules ||
+    isLoadingTeachers ||
+    isLoadingSubjects ||
+    isLoadingClasses ||
+    isLoadingLessonTimes
+  ) {
+    return <div>Loading...</div>;
+  }
 
-// Функция для группировки расписаний по дате, с учетом сортировки
-const groupSchedulesByDayOfWeek = () => {
-  // Получаем текущую дату
-  const today = new Date();
-  const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(endOfWeek.getDate() + 6); // Устанавливаем конец недели на следующий понедельник
+  if (
+    isErrorSchedules ||
+    isErrorTeachers ||
+    isErrorSubjects ||
+    isErrorClasses ||
+    isErrorLessonTimes
+  ) {
+    return <div>Error fetching data</div>;
+  }
 
-  // Создаем объект для хранения расписаний, которые будут отображаться
-  const visibleSchedules: { [date: string]: Schedule[] } = {};
+  const subjects = subjectsData?.subjects?.reduce((acc, subject) => {
+    acc[subject.id] = subject;
+    return acc;
+  }, {} as Record<number, Subject>) || {};
 
-  // Проходимся по всем расписаниям
-  schedules.forEach((schedule: Schedule) => {
-    // Преобразуем дату расписания к формату ISOString и извлекаем дату
-    const scheduleDate = new Date(schedule.date).toISOString().split('T')[0];
+  const teachers = teachersData?.reduce((acc, teacher) => {
+    acc[teacher.id] = teacher;
+    return acc;
+  }, {} as Record<number, Teacher>) || {};
 
-    // Проверяем, попадает ли расписание в текущую неделю
-    if (new Date(scheduleDate) >= startOfWeek && new Date(scheduleDate) <= endOfWeek) {
-      // Используем локальное форматирование даты для получения короткого названия дня недели
-      const date = new Date(schedule.date).toLocaleDateString('ru-RU', { weekday: 'short', month: 'short', day: '2-digit' });
-      if (!visibleSchedules[date]) {
-        visibleSchedules[date] = [];
-      }
-      visibleSchedules[date].push(schedule);
-    }
-  });
+  const classes = classesData?.reduce((acc, classItem) => {
+    acc[classItem.id] = classItem;
+    return acc;
+  }, {} as Record<number, Class>) || {};
 
-  return visibleSchedules;
-};
+  const lessonTimes = lessonTimesData?.reduce((acc, lessonTime) => {
+    acc[lessonTime.id] = lessonTime;
+    return acc;
+  }, {} as Record<number, LessonTime>) || {};
 
-  // Render schedules grouped by date
-  const renderSchedulesByDate = () => {
-    const groupedSchedules = groupSchedulesByDayOfWeek();
+  const renderSchedulesByDate = (
+    groupedSchedules: Record<string, Schedule[]>,
+    subjects: Record<number, Subject>,
+    teachers: Record<number, Teacher>,
+    classes: Record<number, Class>,
+    lessonTimes: Record<number, LessonTime>, // Добавлено
+    currentUserRole: string,
+    handleEditSchedule: (schedule: Schedule) => void
+  ) => {
     return Object.entries(groupedSchedules).map(([date, schedules]) => (
       <div key={date}>
         <h3>{date}</h3>
-        <table className="w-full border-collapse border border-black">                      
+        <table className="w-full border-collapse border border-black">
           <tbody>
-            {schedules && schedules.map((schedule: Schedule, index: number) => (
+            {schedules.map((schedule: Schedule, index: number) => (
               <tr key={schedule.id} className={(index + 1) % 2 === 0 ? 'border-black' : ''}>
                 <td className="p-4">{index + 1}</td>
                 <td className="p-4 w-2/5">{schedule.date}</td>
-                <td className="p-4 w-2/5">{schedule.subject.name}</td>
-                <td className="p-4 w-2/5">{`${schedule.lessonTime.startTime}-${schedule.lessonTime.endTime}`}</td>
-                <td className="p-4 w-2/5">{schedule.teacher.fullName}</td>
+                <td className="p-4 w-2/5">{subjects[schedule.subjectId]?.name || 'N/A'}</td>
+                <td className="p-4 w-2/5">{`${lessonTimes[schedule.lessonTimeId]?.startTime} - ${lessonTimes[schedule.lessonTimeId]?.endTime}` || 'N/A'}</td> {/* Используем время урока */}
+                <td className="p-4 w-2/5">{teachers[schedule.teacherId]?.fullName || 'N/A'}</td>
+                <td className="p-4 w-2/5">{classes[schedule.classId]?.name || 'N/A'}</td>
+
                 {currentUserRole === 'Заместитель Директора' && (
-                <td className="p-4 w-2/5">
-                  <button onClick={() => handleEditSchedule(schedule)}><FaEdit/></button>
-                  <button onClick={() => handleDeleteSchedule(schedule.id)}><FaTrash/></button>
-                </td>
-              )}
+                  <td className="p-4 w-2/5">
+                    <button onClick={() => handleEditSchedule(schedule)}><FaEdit/></button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -97,6 +145,8 @@ const groupSchedulesByDayOfWeek = () => {
       </div>
     ));
   };
+
+  const groupedSchedules = groupSchedulesByDayOfWeek(schedules);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -112,7 +162,9 @@ const groupSchedulesByDayOfWeek = () => {
           value={selectedClass}
           onChange={handleClassChange}
         >
-         <option value="1">1а</option>
+          {/* Options for selecting classes */}
+          {/* Replace with your actual class options */}
+          <option value="1">1а</option>
           <option value="2">1б</option>
           <option value="3">1в</option>
           <option value="4">2а</option>
@@ -147,10 +199,9 @@ const groupSchedulesByDayOfWeek = () => {
           <option value="33">11в</option>
         </select>
       </div>
-      
-      
-      {/* Отображение расписания */}
-      {renderSchedulesByDate()}
+
+      {/* Render schedules */}
+      {renderSchedulesByDate(groupedSchedules, subjects, teachers, classes, lessonTimes, currentUserRole, handleEditSchedule)}
     </div>
   );
 };

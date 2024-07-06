@@ -1,10 +1,16 @@
+// Role interface
+export interface Role {
+  id: number;
+  name: string;
+}
+
+// User interface 
 export interface User {
-  id: string;
+  id: number;
   email: string;
   password: string;
-  name?: string;
-  avatarUrl?: string;
-  role: Role ;
+  name: string;
+  avatarUrl: string;
   roleId: number;
   class?: string;
   dateOfBirth?: Date;
@@ -12,91 +18,61 @@ export interface User {
   updatedAt: Date;
   bio?: string;
   location?: string;
-  posts: Post[]; 
-  comments: Comment[];
-  createdSchedules: Schedule[];
-  schedules: Schedule[]; 
 }
 
-export interface Role {
-  id: string;
-  name: string;
-  users: User[];
-}
-
+// Post interface
 export interface Post {
-  id: string;
+  id: number;
   content: string;
-  author: User;
-  authorId: string
+  authorId: number;
   createdAt: Date;
   updatedAt: Date;
-  comments: Comment[];
 }
 
+// Comment interface
 export interface Comment {
-  id: string;
+  id: number;
   content: string;
-  user: User;
-  userId: string
-  post: Post;
-  postId: string
-  schedule: Schedule;
+  userId: number;
+  postId: number;
+  scheduleId: number;
 }
 
+// Subject interface
 export interface Subject {
-  id: string;
+  id: number;
   name: string;
-  teachers: TeacherSubject[];
-  classes: ClassSubject[];
-  schedules: Schedule[];
 }
 
-export interface TeacherSubject {
-  subject: Subject;
-  teacher: Teacher;
-}
-
-export interface ClassSubject {
-  subject: Subject;
-  class: Class;
-}
-
+// Teacher interface
 export interface Teacher {
-  id: string;
+  id: number;
   fullName: string;
-  subjects: TeacherSubject[];
 }
 
+// Class interface
 export interface Class {
-  id: string;
+  id: number;
   name: string;
-  subjects: ClassSubject[];
-  schedules: Schedule[];
 }
 
+// Schedule interface
 export interface Schedule {
-  id: string;
+  id: number;
   classId: number;
   date: string;
   teacherId: number;
-  teacher: Teacher;
   lessonTimeId: number;
-  lessonTime: LessonTime;
   subjectId: number;
-  subject: Subject;
-  createdBy: User;
   createdById: number;
-  class: Class;
-  comments: Comment[];
   createdAt: Date;
   updatedAt: Date;
 }
 
+// LessonTime interface
 export interface LessonTime {
-  id: string;
+  id: number;
   lessonNumber: number;
   startTime: string;
   endTime: string;
-  schedules: Schedule[];
 }

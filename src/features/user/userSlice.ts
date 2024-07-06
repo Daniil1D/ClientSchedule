@@ -59,9 +59,9 @@ export const selectUserRole = (state: RootState) => {
   }
   
   const roleNames: Record<number, string> = {
-    1: 'Заместитель Директора',
-    2: 'Родитель',
-    3: 'Учитель',
+    1: 'Учитель',
+    2: 'Заместитель Директора',
+    3: 'Родитель',
     4: 'Ученик',
   };
 

@@ -1,24 +1,19 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { Teacher } from "../types";
+import { Teacher, Subject, Schedule } from "../types";
+import { api } from "./api";
 
 // Создаем API для работы с учителями
-export const teachersApi = createApi({
-  reducerPath: "teachersApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "/api" }), // Замените "/api" на ваш базовый URL API
-
+export const teachersApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    createTeacher: builder.mutation<Teacher, { fullName: string }>({
-      query: (teacherData) => ({
+    createTeacher: builder.mutation<Teacher, { fullName: string; subjects: number[] }>({
+      query: ({ fullName, subjects }) => ({
         url: "/teachers",
         method: "POST",
-        body: teacherData,
+        body: { fullName, subjects },
       }),
     }),
-    getAllTeachers: builder.query<{ teachers: Teacher[] }, void>({
-      query: () => ({
-      url: "/teachers",
-      method: "GET",
-        }),
+    getAllTeachers: builder.query<Teacher[], void>({
+      query: () => "/teachers",
     }),
   }),
 });
